@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StudyCoach — Connexion</title>
+<link rel="icon" href="favicon.ico"/><link rel="apple-touch-icon" href="favicon-180.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="config.js"></script>
+<style>
+:root{--bg:#0c0c0f;--bg2:#141418;--bg3:#1c1c22;--bg4:#242429;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#eeecea;--text2:#9b9a96;--text3:#55545a;--accent:#c8f55a;--a2:rgba(200,245,90,.12);--a3:rgba(200,245,90,.3);--danger:#ff6060;--d2:rgba(255,96,96,.1);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Instrument Sans",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(200,245,90,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(200,245,90,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
+.container{width:100%;max-width:400px;}
+.logo{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:28px;text-decoration:none;}
+.logo img{height:70px;width:auto;filter:drop-shadow(0 0 18px rgba(200,245,90,0.35));animation:float 4s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.logo-name{font-family:"Syne",sans-serif;font-size:22px;font-weight:800;letter-spacing:-.03em;color:var(--text);}
+.card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:28px;}
+.tabs{display:flex;gap:4px;background:var(--bg3);border-radius:8px;padding:4px;margin-bottom:24px;}
+.tab{flex:1;padding:9px;font-family:"Instrument Sans",sans-serif;font-size:14px;font-weight:500;background:transparent;border:none;border-radius:7px;color:var(--text2);cursor:pointer;transition:all .15s;}
+.tab.active{background:var(--bg4);color:var(--text);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:6px;}
+.field input{width:100%;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:"Instrument Sans",sans-serif;font-size:14px;padding:0 14px;outline:none;transition:border-color .15s;}
+.field input:focus{border-color:var(--a3);}
+.field input::placeholder{color:var(--text3);}
+.submit-btn{width:100%;padding:13px;margin-top:6px;background:var(--accent);border:none;border-radius:8px;font-family:"Syne",sans-serif;font-size:15px;font-weight:700;color:#0c0c0f;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.submit-btn:hover{filter:brightness(1.08);}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;filter:none;}
+.msg{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none;}
+.msg.err{background:var(--d2);border:1px solid rgba(255,96,96,.25);color:var(--danger);}
+.msg.ok{background:var(--a2);border:1px solid var(--a3);color:var(--accent);}
+.msg.show{display:block;}
+.spin{width:16px;height:16px;border:2.5px solid rgba(12,12,15,.3);border-top-color:#0c0c0f;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.footer-note{text-align:center;font-size:12px;color:var(--text3);margin-top:16px;}
+.footer-note a{color:var(--accent);text-decoration:none;}
+@media(max-width:480px){.card{padding:20px;}.logo img{height:56px;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <a class="logo" href="index.html"><img src="logo.png" alt="StudyCoach"/><span class="logo-name">StudyCoach</span></a>
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="switchTab('login')">Connexion</button>
+      <button class="tab" id="tab-register" onclick="switchTab('register')">Inscription</button>
+    </div>
+    <div class="msg" id="msg"></div>
+    <div id="form-login">
+      <div class="field"><label>Email</label><input type="email" id="l-email" placeholder="vous@exemple.com" autocomplete="email"/></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password"/></div>
+      <button class="submit-btn" id="btn-login" onclick="doLogin()">Se connecter</button>
+    </div>
+    <div id="form-register" style="display:none">
+      <div class="field"><label>Prénom / Nom</label><input type="text" id="r-name" placeholder="Nour"/></div>
+      <div class="field"><label>Email</label><input type="email" id="r-email" placeholder="vous@exemple.com" autocomplete="email"/></div>
+      <div class="field"><label>Mot de passe <span style="color:var(--text3);font-weight:400;">(min. 6 car.)</span></label><input type="password" id="r-pass" placeholder="••••••••" autocomplete="new-password"/></div>
+      <div class="field"><label>Confirmer</label><input type="password" id="r-pass2" placeholder="••••••••" autocomplete="new-password"/></div>
+      <button class="submit-btn" id="btn-register" onclick="doRegister()">Créer mon compte</button>
+    </div>
+  </div>
+  <p class="footer-note"><a href="index.html">← Retour à l'accueil</a></p>
+</div>
+<script>
+const API = STUDYCOACH_BACKEND;
+const saved = localStorage.getItem('sc_token');
+if(saved){try{const p=JSON.parse(atob(saved.split('.')[1]));if(p.exp*1000>Date.now()){const u=JSON.parse(localStorage.getItem('sc_user')||'null');window.location.href=u&&u.role==='admin'?'admin.html':'app.html';}}catch{}}
+function switchTab(tab){
+  document.getElementById('tab-login').classList.toggle('active',tab==='login');
+  document.getElementById('tab-register').classList.toggle('active',tab==='register');
+  document.getElementById('form-login').style.display=tab==='login'?'':'none';
+  document.getElementById('form-register').style.display=tab==='register'?'':'none';
+  document.getElementById('msg').className='msg';
+}
+function showMsg(t,type){const el=document.getElementById('msg');el.textContent=t;el.className='msg '+type+' show';}
+function setLoading(id,on){const b=document.getElementById(id);b.disabled=on;b.innerHTML=on?'<span class="spin"></span>':(id==='btn-login'?'Se connecter':'Créer mon compte');}
+async function doLogin(){
+  document.getElementById('msg').className='msg';
+  const email=document.getElementById('l-email').value.trim();
+  const pass=document.getElementById('l-pass').value;
+  if(!email||!pass){showMsg('Veuillez remplir tous les champs.','err');return;}
+  setLoading('btn-login',true);
+  try{
+    const res=await fetch(API+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+    const data=await res.json();
+    if(!data.success){showMsg(data.error,'err');return;}
+    localStorage.setItem('sc_token',data.token);
+    localStorage.setItem('sc_user',JSON.stringify(data.user));
+    showMsg('Connexion réussie !','ok');
+    setTimeout(()=>window.location.href=data.user.role==='admin'?'admin.html':'app.html',700);
+  }catch{showMsg('Impossible de joindre le serveur. Le backend tourne ?','err');}
+  finally{setLoading('btn-login',false);}
+}
+async function doRegister(){
+  document.getElementById('msg').className='msg';
+  const name=document.getElementById('r-name').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const pass=document.getElementById('r-pass').value;
+  const pass2=document.getElementById('r-pass2').value;
+  if(!name||!email||!pass||!pass2){showMsg('Veuillez remplir tous les champs.','err');return;}
+  if(pass!==pass2){showMsg('Les mots de passe ne correspondent pas.','err');return;}
+  setLoading('btn-register',true);
+  try{
+    const res=await fetch(API+'/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password:pass})});
+    const data=await res.json();
+    if(!data.success){showMsg(data.error,'err');return;}
+    localStorage.setItem('sc_token',data.token);
+    localStorage.setItem('sc_user',JSON.stringify(data.user));
+    showMsg('Compte créé ! Bienvenue ','ok');
+    setTimeout(()=>window.location.href='app.html',800);
+  }catch{showMsg('Impossible de joindre le serveur.','err');}
+  finally{setLoading('btn-register',false);}
+}
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const v=document.getElementById('form-login').style.display!=='none';if(v)doLogin();else doRegister();});
+</script>
+</body>
+</html>

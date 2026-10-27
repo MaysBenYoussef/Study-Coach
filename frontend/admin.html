@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StudyCoach — Administration</title>
+<link rel="icon" href="favicon.ico"/>
+<link rel="apple-touch-icon" href="favicon-180.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="config.js"></script>
+<style>
+:root{
+  --bg:#0c0c0f;--bg2:#111115;--bg3:#18181d;--bg4:#202026;--bg5:#28282f;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);--border3:rgba(255,255,255,0.18);
+  --text:#eeecea;--text2:#989692;--text3:#55545a;
+  --accent:#c8f55a;--a2:rgba(200,245,90,.12);--a3:rgba(200,245,90,.28);
+  --danger:#ff6060;--d2:rgba(255,96,96,.1);--d3:rgba(255,96,96,.3);
+  --info:#60a5fa;--i2:rgba(96,165,250,.1);--i3:rgba(96,165,250,.3);
+  --orange:#fb923c;--o2:rgba(251,146,60,.1);
+  --r:12px;--rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;padding:0 24px;height:56px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0;gap:12px;z-index:50;}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
+.logo img{height:30px;width:auto;filter:drop-shadow(0 0 8px rgba(200,245,90,0.3));}
+.logo-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;letter-spacing:-.03em;color:var(--text);}
+.admin-badge{padding:3px 10px;background:var(--d2);border:1px solid var(--d3);border-radius:100px;font-size:11px;font-weight:600;color:var(--danger);letter-spacing:.05em;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.user-pill{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 5px;border:1px solid var(--border2);border-radius:100px;}
+.user-avatar{width:26px;height:26px;border-radius:50%;background:var(--d2);border:1px solid var(--d3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--danger);}
+.user-name{font-size:13px;color:var(--text2);}
+.app-btn{padding:5px 12px;font-size:12px;background:var(--a2);border:1px solid var(--a3);border-radius:var(--rs);color:var(--accent);text-decoration:none;font-family:'Instrument Sans',sans-serif;transition:all .15s;}
+.app-btn:hover{background:rgba(200,245,90,.2);}
+.logout-btn{padding:5px 12px;font-size:12px;background:transparent;border:1px solid var(--border2);border-radius:var(--rs);color:var(--text3);cursor:pointer;transition:all .15s;font-family:'Instrument Sans',sans-serif;}
+.logout-btn:hover{border-color:var(--d3);color:var(--danger);background:var(--d2);}
+
+/* ── SHELL ── */
+.shell{display:flex;flex:1;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:220px;flex-shrink:0;border-right:1px solid var(--border);background:var(--bg);overflow-y:auto;padding:16px 0;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;transition:all .15s;border-left:2px solid transparent;}
+.sb-item:hover{color:var(--text2);background:var(--bg3);}
+.sb-item.active{color:var(--danger);background:var(--d2);border-left-color:var(--danger);}
+.sb-icon{font-size:16px;width:20px;text-align:center;}
+.sb-sep{height:1px;background:var(--border);margin:8px 16px;}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;padding:28px 32px;}
+.view{display:none;}
+.view.active{display:block;}
+.page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px;}
+.page-sub{font-size:13px;color:var(--text2);margin-bottom:24px;}
+
+/* ── STAT CARDS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px;}
+.stat-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:4px;}
+.stat-lbl{font-size:12px;color:var(--text3);}
+.stat-card.red .stat-val{color:var(--danger);}
+.stat-card.green .stat-val{color:var(--accent);}
+.stat-card.blue .stat-val{color:var(--info);}
+.stat-card.orange .stat-val{color:var(--orange);}
+
+/* ── MODE BARS ── */
+.mode-bars{display:flex;gap:8px;margin-bottom:24px;}
+.mode-bar-wrap{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;}
+.mode-bar-label{font-size:12px;color:var(--text3);margin-bottom:8px;}
+.mode-bar-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;}
+.mode-bar-track{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;}
+.mode-bar-fill{height:100%;border-radius:3px;transition:width .4s ease;}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px;}
+.table-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg3);}
+.table-title{font-size:14px;font-weight:600;color:var(--text);}
+.table-count{font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+table{width:100%;border-collapse:collapse;}
+th{padding:10px 16px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:1px solid var(--border);}
+td{padding:11px 16px;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bg3);}
+.role-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+.role-admin{background:var(--d2);color:var(--danger);}
+.role-student{background:var(--i2);color:var(--info);}
+.mode-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600;text-transform:uppercase;}
+.mode-lazy{background:rgba(96,165,250,.12);color:var(--info);}
+.mode-balanced{background:var(--a2);color:var(--accent);}
+.mode-hardcore{background:var(--d2);color:var(--danger);}
+
+/* ── ACTIONS ── */
+.action-btns{display:flex;gap:6px;}
+.act-btn{padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;transition:all .12s;font-family:'Instrument Sans',sans-serif;}
+.act-promote{background:var(--a2);color:var(--accent);border:1px solid var(--a3);}
+.act-promote:hover{background:rgba(200,245,90,.2);}
+.act-demote{background:var(--i2);color:var(--info);border:1px solid var(--i3);}
+.act-demote:hover{background:rgba(96,165,250,.2);}
+.act-delete{background:var(--d2);color:var(--danger);border:1px solid var(--d3);}
+.act-delete:hover{background:rgba(255,96,96,.2);}
+
+/* ── OLLAMA STATUS ── */
+.ollama-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px;}
+.ollama-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.ollama-dot{width:10px;height:10px;border-radius:50%;background:var(--text3);}
+.ollama-dot.on{background:var(--accent);box-shadow:0 0 8px var(--accent);}
+.ollama-dot.off{background:var(--danger);}
+.ollama-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;}
+.model-list{display:flex;flex-direction:column;gap:6px;}
+.model-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);}
+.model-name{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);}
+.model-active{padding:2px 8px;background:var(--a2);border:1px solid var(--a3);border-radius:100px;font-size:10px;font-weight:600;color:var(--accent);}
+.model-size{font-size:11px;color:var(--text3);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg4);border:1px solid var(--border3);border-radius:var(--rs);padding:10px 16px;font-size:13px;color:var(--text);z-index:999;transform:translateY(60px);opacity:0;transition:all .25s ease;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* ── CONFIRM MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border3);border-radius:14px;padding:28px;width:100%;max-width:380px;margin:20px;}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:10px;}
+.modal-msg{font-size:14px;color:var(--text2);margin-bottom:22px;line-height:1.6;}
+.modal-foot{display:flex;gap:8px;justify-content:flex-end;}
+.btn-cancel{padding:9px 18px;background:transparent;border:1px solid var(--border2);border-radius:var(--rs);color:var(--text2);font-family:'Instrument Sans',sans-serif;font-size:13px;cursor:pointer;}
+.btn-confirm{padding:9px 18px;background:var(--danger);border:none;border-radius:var(--rs);color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:2px;}
+
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .main{padding:16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a class="logo" href="index.html">
+    <img src="logo.png" alt="StudyCoach"/>
+    <span class="logo-name">StudyCoach</span>
+  </a>
+  <span class="admin-badge">ADMIN</span>
+  <div class="topbar-right">
+    <div class="user-pill">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <span class="user-name" id="userName">Admin</span>
+    </div>
+    <a class="app-btn" href="app.html">← App étudiant</a>
+    <button class="logout-btn" onclick="doLogout()">Déconnexion</button>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-item active" onclick="showView('dashboard',this)">
+      <span class="sb-icon">📊</span>Vue d'ensemble
+    </div>
+    <div class="sb-item" onclick="showView('users',this);loadUsers()">
+      <span class="sb-icon">👥</span>Utilisateurs
+    </div>
+    <div class="sb-item" onclick="showView('plans',this);loadAllPlans()">
+      <span class="sb-icon">📋</span>Tous les plans
+    </div>
+    <div class="sb-sep"></div>
+    <div class="sb-item" onclick="showView('ollama',this);loadOllama()">
+      <span class="sb-icon">🤖</span>Statut Ollama
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <p class="page-title">Vue d'ensemble</p>
+      <p class="page-sub">Statistiques globales de la plateforme StudyCoach.</p>
+
+      <div class="stat-grid">
+        <div class="stat-card blue">
+          <div class="stat-val" id="st-users">—</div>
+          <div class="stat-lbl">Utilisateurs inscrits</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-val" id="st-plans">—</div>
+          <div class="stat-lbl">Plans générés</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-val" id="st-sessions">—</div>
+          <div class="stat-lbl">Sessions Pomodoro</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-val" id="st-minutes">—</div>
+          <div class="stat-lbl">Minutes étudiées</div>
+        </div>
+      </div>
+
+      <p style="font-size:13px;font-weight:600;color:var(--text3);margin-bottom:12px;letter-spacing:.08em;text-transform:uppercase;">Plans par mode</p>
+      <div class="mode-bars" id="modeBars">
+        <div class="mode-bar-wrap">
+          <div class="mode-bar-label">😴 Lazy</div>
+          <div class="mode-bar-val" id="mb-lazy">—</div>
+          <div class="mode-bar-track"><div class="mode-bar-fill" id="mf-lazy" style="background:var(--info);width:0%"></div></div>
+        </div>
+        <div class="mode-bar-wrap">
+          <div class="mode-bar-label">🧘 Balanced</div>
+          <div class="mode-bar-val" id="mb-balanced">—</div>
+          <div class="mode-bar-track"><div class="mode-bar-fill" id="mf-balanced" style="background:var(--accent);width:0%"></div></div>
+        </div>
+        <div class="mode-bar-wrap">
+          <div class="mode-bar-label">⚡ Hardcore</div>
+          <div class="mode-bar-val" id="mb-hardcore">—</div>
+          <div class="mode-bar-track"><div class="mode-bar-fill" id="mf-hardcore" style="background:var(--danger);width:0%"></div></div>
+        </div>
+      </div>
+
+      <p style="font-size:13px;font-weight:600;color:var(--text3);margin-bottom:12px;letter-spacing:.08em;text-transform:uppercase;">Activité plateforme — 7 derniers jours</p>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;">
+        <div style="display:flex;gap:6px;align-items:flex-end;height:80px;" id="weekBarsAdmin"></div>
+        <div style="display:flex;gap:6px;margin-top:6px;" id="weekLabelsAdmin"></div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="view" id="view-users">
+      <p class="page-title">Gestion des Utilisateurs</p>
+      <p class="page-sub">Voir, promouvoir ou supprimer les comptes.</p>
+
+      <div class="table-wrap">
+        <div class="table-head">
+          <span class="table-title">Tous les utilisateurs</span>
+          <span class="table-count" id="userCount">—</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Rôle</th>
+                <th>Plans</th>
+                <th>Sessions</th>
+                <th>Minutes</th>
+                <th>Jours</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px;">Chargement...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLANS -->
+    <div class="view" id="view-plans">
+      <p class="page-title">Tous les Plans</p>
+      <p class="page-sub">Les 100 derniers plans générés sur la plateforme.</p>
+
+      <div class="table-wrap">
+        <div class="table-head">
+          <span class="table-title">Plans récents</span>
+          <span class="table-count" id="planCount">—</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Utilisateur</th>
+                <th>Mode</th>
+                <th>Modèle</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="plansTableBody">
+              <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:24px;">Chargement...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- OLLAMA -->
+    <div class="view" id="view-ollama">
+      <p class="page-title">Statut Ollama</p>
+      <p class="page-sub">Modèles disponibles sur votre machine locale.</p>
+
+      <div class="ollama-card" id="ollamaCard">
+        <div style="color:var(--text3);font-size:13px;">Vérification du statut...</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Confirm Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <p class="modal-title" id="modalTitle">Confirmer</p>
+    <p class="modal-msg" id="modalMsg"></p>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-confirm" id="modalConfirm">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ AUTH GUARD — ADMIN ONLY ════════════════════════════════════
+const token = localStorage.getItem('sc_token');
+const user  = JSON.parse(localStorage.getItem('sc_user') || 'null');
+if (!token || !user) { window.location.href = 'auth.html'; }
+try {
+  const p = JSON.parse(atob(token.split('.')[1]));
+  if (p.exp * 1000 < Date.now()) { localStorage.removeItem('sc_token'); localStorage.removeItem('sc_user'); window.location.href = 'auth.html'; }
+} catch { window.location.href = 'auth.html'; }
+if (user && user.role !== 'admin') { window.location.href = 'app.html'; }
+
+const BACKEND = STUDYCOACH_BACKEND;
+const initials = (user.name || 'A').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+document.getElementById('userAvatar').textContent = initials;
+document.getElementById('userName').textContent   = user.name || user.email;
+
+function doLogout() { localStorage.removeItem('sc_token'); localStorage.removeItem('sc_user'); window.location.href = 'auth.html'; }
+function H() { return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }; }
+
+// ══ NAVIGATION ══════════════════════════════════════════════════
+function showView(name, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ══ DASHBOARD ═══════════════════════════════════════════════════
+async function loadDashboard() {
+  try {
+    const res  = await fetch(BACKEND + '/api/admin/stats', { headers: H() });
+    const data = await res.json();
+    if (!data.success) return;
+    const s = data.stats;
+
+    document.getElementById('st-users').textContent    = s.total_users;
+    document.getElementById('st-plans').textContent    = s.total_plans;
+    document.getElementById('st-sessions').textContent = s.total_sessions;
+    document.getElementById('st-minutes').textContent  = s.total_minutes;
+
+    // Mode bars
+    const total = s.total_plans || 1;
+    const modes = ['lazy','balanced','hardcore'];
+    modes.forEach(m => {
+      const v = s.plans_by_mode[m] || 0;
+      document.getElementById('mb-' + m).textContent = v;
+      document.getElementById('mf-' + m).style.width = Math.round(v / total * 100) + '%';
+    });
+
+    // Weekly bars
+    renderWeekBars(s.weekly || [], 'weekBarsAdmin', 'weekLabelsAdmin');
+  } catch(e) { console.error('Dashboard error:', e); }
+}
+
+function renderWeekBars(weekly, barsId, lblsId) {
+  const bars = document.getElementById(barsId);
+  const lbls = document.getElementById(lblsId);
+  const days = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const today = new Date();
+  const week  = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    const row = weekly.find(r => r.day && r.day.startsWith(key));
+    week.push({ label: days[d.getDay()], mins: row ? parseInt(row.minutes) : 0 });
+  }
+  const max = Math.max(...week.map(w => w.mins), 1);
+  bars.innerHTML = week.map(w =>
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">' +
+      '<div style="width:100%;background:var(--a2);border-radius:3px 3px 0 0;border:1px solid var(--a3);transition:height .4s;min-height:3px;height:' + Math.max(Math.round(w.mins/max*100),2) + '%;"></div>' +
+    '</div>'
+  ).join('');
+  lbls.innerHTML = week.map(w =>
+    '<span style="flex:1;text-align:center;font-size:10px;color:var(--text3);">' + w.label + '</span>'
+  ).join('');
+}
+
+// ══ USERS ════════════════════════════════════════════════════════
+async function loadUsers() {
+  const tbody = document.getElementById('usersTableBody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px;">Chargement...</td></tr>';
+  try {
+    const res  = await fetch(BACKEND + '/api/admin/users', { headers: H() });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    document.getElementById('userCount').textContent = data.users.length + ' utilisateurs';
+
+    if (!data.users.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px;">Aucun utilisateur.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.users.map(u => {
+      const isMe   = u.user_id === user.id;
+      const isAdmin = u.role === 'admin';
+      return '<tr>' +
+        '<td style="color:var(--text);font-weight:500;">' + esc(u.name || '—') + (isMe ? ' <span style="font-size:10px;color:var(--text3);">(vous)</span>' : '') + '</td>' +
+        '<td><span class="role-badge ' + (isAdmin ? 'role-admin' : 'role-student') + '">' + u.role + '</span></td>' +
+        '<td>' + (u.total_plans || 0) + '</td>' +
+        '<td>' + (u.total_sessions || 0) + '</td>' +
+        '<td>' + (u.total_minutes_studied || 0) + ' min</td>' +
+        '<td>' + (u.study_days || 0) + ' j</td>' +
+        '<td><div class="action-btns">' +
+          (!isMe && !isAdmin ? '<button class="act-btn act-promote" onclick="changeRole(\'' + u.user_id + '\',\'admin\',\'' + esc(u.name) + '\')">Promouvoir admin</button>' : '') +
+          (!isMe && isAdmin  ? '<button class="act-btn act-demote"  onclick="changeRole(\'' + u.user_id + '\',\'student\',\'' + esc(u.name) + '\')">Rétrograder</button>' : '') +
+          (!isMe ? '<button class="act-btn act-delete" onclick="deleteUser(\'' + u.user_id + '\',\'' + esc(u.name) + '\')">Supprimer</button>' : '') +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+  } catch(err) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--danger);padding:24px;">Erreur : ' + err.message + '</td></tr>';
+  }
+}
+
+async function changeRole(userId, newRole, name) {
+  showConfirm(
+    newRole === 'admin' ? 'Promouvoir en admin' : 'Rétrograder en étudiant',
+    'Voulez-vous changer le rôle de ' + name + ' en "' + newRole + '" ?',
+    async () => {
+      try {
+        const res  = await fetch(BACKEND + '/api/admin/users/' + userId + '/role', {
+          method: 'PATCH', headers: H(), body: JSON.stringify({ role: newRole })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        showToast('Rôle mis à jour : ' + newRole);
+        loadUsers();
+      } catch(err) { showToast('Erreur : ' + err.message); }
+    }
+  );
+}
+
+async function deleteUser(userId, name) {
+  showConfirm(
+    'Supprimer le compte',
+    'Supprimer définitivement le compte de ' + name + ' ? Tous ses plans et sessions seront perdus.',
+    async () => {
+      try {
+        const res  = await fetch(BACKEND + '/api/admin/users/' + userId, { method: 'DELETE', headers: H() });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        showToast('Compte supprimé');
+        loadUsers();
+      } catch(err) { showToast('Erreur : ' + err.message); }
+    }
+  );
+}
+
+// ══ PLANS ════════════════════════════════════════════════════════
+async function loadAllPlans() {
+  const tbody = document.getElementById('plansTableBody');
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:24px;">Chargement...</td></tr>';
+  try {
+    const res  = await fetch(BACKEND + '/api/admin/plans', { headers: H() });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    document.getElementById('planCount').textContent = data.plans.length + ' plans';
+
+    if (!data.plans.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:24px;">Aucun plan.</td></tr>';
+      return;
+    }
+
+    const mc = { lazy:'mode-lazy', balanced:'mode-balanced', hardcore:'mode-hardcore' };
+    tbody.innerHTML = data.plans.map(p =>
+      '<tr>' +
+        '<td style="color:var(--text);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(p.title || p.situation || '—') + '</td>' +
+        '<td>' + esc(p.user_name || '—') + '</td>' +
+        '<td><span class="mode-badge ' + (mc[p.mode] || '') + '">' + (p.mode || '—') + '</span></td>' +
+        '<td style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--text3);">' + esc(p.model_used || '—') + '</td>' +
+        '<td style="color:var(--text3);font-size:12px;">' + fmtDate(p.created_at) + '</td>' +
+      '</tr>'
+    ).join('');
+  } catch(err) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:24px;">Erreur : ' + err.message + '</td></tr>';
+  }
+}
+
+// ══ OLLAMA ═══════════════════════════════════════════════════════
+async function loadOllama() {
+  const card = document.getElementById('ollamaCard');
+  card.innerHTML = '<div style="color:var(--text3);font-size:13px;">Vérification...</div>';
+  try {
+    const res  = await fetch(BACKEND + '/api/admin/ollama', { headers: H() });
+    const data = await res.json();
+
+    const statusColor = data.online ? 'var(--accent)' : 'var(--danger)';
+    const statusText  = data.online ? 'En ligne' : 'Hors ligne';
+
+    let html =
+      '<div class="ollama-header">' +
+        '<div class="ollama-dot ' + (data.online ? 'on' : 'off') + '"></div>' +
+        '<div>' +
+          '<div class="ollama-name">Ollama — ' + statusText + '</div>' +
+          '<div style="font-size:12px;color:var(--text3);margin-top:2px;">' +
+            'Modèle IA : <span style="color:var(--accent);font-family:JetBrains Mono,monospace;">' + (data.current_model || '—') + '</span>' +
+            ' &nbsp;·&nbsp; Modèle PDF : <span style="color:var(--info);font-family:JetBrains Mono,monospace;">' + (data.pdf_model || '—') + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    if (data.online && data.available_models && data.available_models.length) {
+      html += '<p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:10px;">Modèles disponibles (' + data.available_models.length + ')</p>';
+      html += '<div class="model-list">';
+      data.available_models.forEach(m => {
+        const isAI  = m.name === data.current_model;
+        const isPDF = m.name === data.pdf_model;
+        const size  = m.size ? (m.size / 1e9).toFixed(1) + ' Go' : '';
+        html +=
+          '<div class="model-item">' +
+            '<span class="model-name">' + m.name + '</span>' +
+            '<div style="display:flex;align-items:center;gap:6px;">' +
+              (isAI  ? '<span class="model-active">Modèle IA</span>' : '') +
+              (isPDF ? '<span style="padding:2px 8px;background:var(--i2);border:1px solid var(--i3);border-radius:100px;font-size:10px;font-weight:600;color:var(--info);">PDF</span>' : '') +
+              (size  ? '<span class="model-size">' + size + '</span>' : '') +
+            '</div>' +
+          '</div>';
+      });
+      html += '</div>';
+    } else if (!data.online) {
+      html += '<div style="padding:16px;background:var(--d2);border:1px solid var(--d3);border-radius:var(--rs);font-size:13px;color:var(--danger);">' +
+        'Ollama n\'est pas accessible. Lance : <code style="font-family:JetBrains Mono,monospace;">$env:OLLAMA_ORIGINS="*"; ollama serve</code>' +
+        '</div>';
+    }
+
+    card.innerHTML = html;
+  } catch(err) {
+    card.innerHTML = '<div style="color:var(--danger);font-size:13px;">Erreur : ' + err.message + '</div>';
+  }
+}
+
+// ══ CONFIRM MODAL ════════════════════════════════════════════════
+let confirmCallback = null;
+function showConfirm(title, msg, cb) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalMsg').textContent   = msg;
+  confirmCallback = cb;
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('modalConfirm').onclick = () => { closeModal(); if(confirmCallback) confirmCallback(); };
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); confirmCallback = null; }
+document.getElementById('overlay').addEventListener('click', e => { if(e.target === document.getElementById('overlay')) closeModal(); });
+
+// ══ HELPERS ══════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
+}
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══ BOOT ═════════════════════════════════════════════════════════
+loadDashboard();
+</script>
+</body>
+</html>
